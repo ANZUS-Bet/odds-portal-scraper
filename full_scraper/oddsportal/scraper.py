@@ -131,6 +131,8 @@ class Scraper(object):
                     # Now get the table cell with overall score
                     overall_score_cell = tournament_table.find('tbody > tr').eq(i).find('td.table-score')
                     overall_score_string = overall_score_cell.text()
+                    if 'OT' in overall_score_string:
+                        game.overtime = True
                     # Perform crude sanitization against various things appended to scores, like " OT"
                     overall_score_string = overall_score_string.split()[0]
                     # Home team/participant is always listed first in Odds Portal's scores

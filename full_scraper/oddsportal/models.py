@@ -25,6 +25,7 @@ class Game(object):
         self.outcome = str()
         self.score_home = str()
         self.score_away = str()
+        self.overtime = False
 
 
 class Season(object):
