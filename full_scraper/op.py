@@ -11,20 +11,28 @@ from oddsportal import Crawler
 from oddsportal import DataRepository
 from oddsportal import Scraper
 
+import os
 import argparse
 import json
 import logging
 import time
+import pathlib
 
 #######################################################################################################################
 
-TARGET_SPORTS_FILE = 'config/sports.json'
-OUTPUT_DIRECTORY_PATH = 'output'
+DIR_PATH = pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
 
 #######################################################################################################################
+
+TARGET_SPORTS_FILE = DIR_PATH / 'config/sports.json'
+OUTPUT_DIRECTORY_PATH = str(DIR_PATH / 'output')
+
+#######################################################################################################################
+
+
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s', \
-                    handlers=[ logging.FileHandler('logs/oddsportal_' + str(int(time.time())) + '.log'),\
+                    handlers=[ logging.FileHandler(DIR_PATH/('logs/oddsportal_' + str(int(time.time())) + '.log')),\
                                logging.StreamHandler() ])
 logger = logging.getLogger('oddsportal')
 
@@ -42,20 +50,20 @@ def get_target_sports_from_file():
 def scrape_games_for_season(this_season):
     global wait_on_page_load
     logger.info('Season "%s" - getting all pagination links', this_season.name)
-    crawler = Crawler(wait_on_page_load=wait_on_page_load)
+    crawler = Crawler(wait_on_page_load=wait_on_page_load, full_scraper_path=DIR_PATH)
     logger.info('Season "%s" - started this crawler', this_season.name)
     crawler.fill_in_season_pagination_links(this_season)
     crawler.close_browser()
     logger.info('Season "%s" - closed this crawler', this_season.name)
     logger.info('Season "%s" - populating all game data via pagination links', this_season.name)
-    scraper = Scraper(wait_on_page_load=wait_on_page_load)
+    scraper = Scraper(wait_on_page_load=wait_on_page_load, full_scraper_path=DIR_PATH)
     logger.info('Season "%s" - started this scraper', this_season.name)
     scraper.populate_games_into_season(this_season)
     scraper.close_browser()
     logger.info('Season "%s" - closed this scraper', this_season.name)
     return this_season
 
-def main():
+def main(sport=None):
     global logger, data, wait_on_page_load
     # Instantiate the argument parser
     parser = argparse.ArgumentParser(description='oddsporter v1.0')
@@ -87,7 +95,10 @@ def main():
     print('\t[0] ' + 'all sports *buggy*')
     for i, target_sport_obj in enumerate(target_sports):
         print('\t[' + str(i+1) + '] ' + target_sport_obj['collection_name'])
-    sport_to_do = input('Selection: ')
+    if sport:
+        sport_to_do = str(sport)
+    else:
+        sport_to_do = input('Selection: ')
     if False == sport_to_do.isdigit():
         raise RuntimeError('Invalid selection, please re-rerun and try again')
     else:
@@ -98,7 +109,7 @@ def main():
         logger.info('Will attempt to scrape all sports')
     else:
         logger.info('Only scraping one sport though')
-    crawler = Crawler(wait_on_page_load=wait_on_page_load)
+    crawler = Crawler(wait_on_page_load=wait_on_page_load, full_scraper_path=DIR_PATH)
     logger.info('Crawler for season links has been initialized')
     ran_once = False
     for i, target_sport_obj in enumerate(target_sports):

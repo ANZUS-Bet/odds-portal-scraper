@@ -32,7 +32,7 @@ class Scraper(object):
     Makes use of Selenium and BeautifulSoup modules.
     """
     
-    def __init__(self, wait_on_page_load=3):
+    def __init__(self, full_scraper_path, wait_on_page_load=3):
         """
         Constructor
         """
@@ -42,7 +42,7 @@ class Scraper(object):
             self.wait_on_page_load = 3
         self.options = webdriver.ChromeOptions()
         self.options.add_argument('headless')
-        self.driver = webdriver.Chrome('./chromedriver/chromedriver', chrome_options=self.options)
+        self.driver = webdriver.Chrome(str(full_scraper_path/ 'chromedriver/chromedriver'), chrome_options=self.options)
         logger.info('Chrome browser opened in headless mode')
         
         # exception when no driver created
